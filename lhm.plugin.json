@@ -1,0 +1,129 @@
+{
+  "identifier": "cotes-spectraledge",
+  "name": "SpectralEdge by Cotes",
+  "version": "1.4.0",
+  "description": "Model signals for Kalshi's BTC 15-minute markets (KXBTC15M): the live round's readings and settled history with how each signal resolved. Read-only; sign in with a SpectralEdge account.",
+  "author": "Cotes",
+  "authorUrl": "https://cotes.ai",
+  "homepage": "https://spectralbot.cotes.ai/docs/",
+  "cloudEndpoint": "https://mcp.cotes.ai/mcp",
+  "icon": "https://mcp.cotes.ai/icon.png",
+  "tags": [
+    "kalshi",
+    "bitcoin",
+    "prediction-markets",
+    "trading-signals",
+    "btc"
+  ],
+  "tools": [
+    {
+      "name": "get_active_contest",
+      "description": "The round trading right now for a series prefix, with every signal raised so far.",
+      "inputSchema": {
+        "properties": {
+          "series": {
+            "default": "KXBTC15M",
+            "description": "Series prefix, not a full ticker. KXBTC15M is Kalshi's BTC 15-minute series.",
+            "examples": [
+              "KXBTC15M"
+            ],
+            "title": "Series",
+            "type": "string"
+          }
+        },
+        "title": "get_active_contestArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_contests",
+      "description": "Settled rounds for a series, newest first, with every signal already graded.",
+      "inputSchema": {
+        "properties": {
+          "series": {
+            "default": "KXBTC15M",
+            "description": "Series prefix, not a full ticker. KXBTC15M is Kalshi's BTC 15-minute series.",
+            "examples": [
+              "KXBTC15M"
+            ],
+            "title": "Series",
+            "type": "string"
+          },
+          "limit": {
+            "default": 20,
+            "description": "How many settled rounds to return, newest first.",
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "since": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "ISO-8601 instant; only rounds whose window.expires_at is at or after it.",
+            "examples": [
+              "2026-11-01T00:00:00Z"
+            ],
+            "title": "Since"
+          },
+          "before": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "ISO-8601 instant, inclusive on window.expires_at. To page back, pass the oldest expires_at already received and drop the repeated row.",
+            "examples": [
+              "2026-11-05T12:00:00Z"
+            ],
+            "title": "Before"
+          }
+        },
+        "title": "list_contestsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_contest",
+      "description": "One round by full ticker, live or settled, with its signals.",
+      "inputSchema": {
+        "properties": {
+          "ticker": {
+            "description": "Full venue ticker copied from another tool's `ticker` field; never constructed.",
+            "examples": [
+              "KXBTC15M-26AUG061600-00"
+            ],
+            "title": "Ticker",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ticker"
+        ],
+        "title": "get_contestArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "name": "monitor_live_signals",
+      "description": "Summarize the round trading right now."
+    },
+    {
+      "name": "measure_accuracy",
+      "description": "Count how the last N settled rounds resolved at the user's own confidence threshold."
+    }
+  ]
+}
