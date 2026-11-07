@@ -1,5 +1,7 @@
 # SpectralEdge by Cotes — MCP server
 
+[![MCP Badge](https://lobehub.com/badge/mcp/cotes-spectraledge)](https://lobehub.com/mcp/cotes-spectraledge)
+
 Read SpectralEdge's model signals for Kalshi's Bitcoin 15-minute markets (series `KXBTC15M`) from Claude, ChatGPT, Cursor or any MCP client: the round trading now with every reading raised so far, and settled rounds with how each reading resolved.
 
 - **Endpoint:** `https://mcp.cotes.ai/mcp` (Streamable HTTP, hosted — nothing to install)
