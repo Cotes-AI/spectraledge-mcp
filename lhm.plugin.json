@@ -1,7 +1,7 @@
 {
   "identifier": "cotes-spectraledge",
   "name": "SpectralEdge by Cotes",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Model signals for Kalshi's BTC 15-minute markets (KXBTC15M): the live round's readings and settled history with how each signal resolved. Read-only; sign in with a SpectralEdge account.",
   "author": "Cotes",
   "authorUrl": "https://cotes.ai",
@@ -114,6 +114,29 @@
         "title": "get_contestArguments",
         "type": "object"
       }
+    }
+  ],
+  "resources": [
+    {
+      "name": "reading_signals",
+      "title": "Reading SpectralEdge signals",
+      "uri": "spectraledge://guide/reading-signals",
+      "description": "What each signal field means and how to threshold readings before counting a hit rate.",
+      "mimeType": "text/markdown"
+    },
+    {
+      "name": "active_contest",
+      "title": "Active BTC 15-minute contest",
+      "uri": "spectraledge://contests/active",
+      "description": "The KXBTC15M round trading now, with every signal raised so far.",
+      "mimeType": "application/json"
+    },
+    {
+      "name": "contest",
+      "title": "Contest by ticker",
+      "uriTemplate": "spectraledge://contests/{ticker}",
+      "description": "One round by full ticker, live or settled, with its signals.",
+      "mimeType": "application/json"
     }
   ],
   "prompts": [
