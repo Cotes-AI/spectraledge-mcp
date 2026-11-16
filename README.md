@@ -2,12 +2,25 @@
 
 [![MCP Badge](https://lobehub.com/badge/mcp/cotes-spectraledge)](https://lobehub.com/mcp/cotes-spectraledge)
 
-Read SpectralEdge's model signals for Kalshi's Bitcoin 15-minute markets (series `KXBTC15M`) from Claude, ChatGPT, Cursor or any MCP client: the round trading now with every reading raised so far, and settled rounds with how each reading resolved.
+Read SpectralEdge's model signals for Kalshi's BTC, ETH, SOL and XRP 15-minute markets from Claude, ChatGPT, Cursor or any MCP client: the round trading now with every reading raised so far, and settled rounds with how each reading resolved.
 
 - **Endpoint:** `https://mcp.cotes.ai/mcp` (Streamable HTTP, hosted — nothing to install)
 - **Auth:** sign in with a SpectralEdge account (OAuth), or send an API key
 - **Access:** an active SpectralEdge trial or subscription
 - **Read-only:** no tool places orders or touches a Kalshi account
+
+## Choose the asset
+
+For BTC use `KXBTC15M`, ETH `KXETH15M`, SOL `KXSOL15M`, and XRP `KXXRP15M`.
+Pass `series` to MCP tools. BTC remains
+the default when no asset is named. Keep different assets and model versions separate
+in accuracy, calibration, and P&L reports. Use each asset's own dollar price scale;
+XRP prices can have fractions of a cent.
+
+The MCP `list_series` tool returns the crypto catalog and latest
+stored readings. A catalog entry does not promise a running producer. Empty signals
+are not a neutral forecast; report that no readings were stored. `last_signal_at`
+can be stale, and a null model tag can belong to an older unversioned reading.
 
 ## Features
 
@@ -81,6 +94,10 @@ X-API-Token: cotes_sk_...
 Signed-in apps are listed under **Account → API keys → Connected apps**, where you can disconnect them. Reconnecting the same app replaces its previous connection.
 
 ## Tools
+
+### `list_series`
+
+Returns the crypto catalog, active tickers, and the model tag and timestamp of the latest stored reading for each series. Takes no arguments.
 
 ### `get_active_contest`
 
@@ -194,3 +211,7 @@ This repository holds the server's marketplace listing; the server itself is hos
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+## Resources
+
+The fixed `spectraledge://contests/active` resource stays on BTC. Use `spectraledge://contests/active/{series}` for another asset. Recorded series outside the crypto catalog, such as KXGOLD15M, remain queryable through contest tools and resources.
