@@ -177,12 +177,13 @@ Counts how the last N settled rounds resolved, taking the first reading per roun
 
 ## Reading a signal
 
-- Every reading the model raised is returned, including ones below the threshold SpectralEdge acts on. The API does not publish that threshold or mark which readings fired, so apply your own confidence threshold before treating a reading as a call.
+- Every reading the model raised is returned, including ones that did not fire. `fired` is `true` on readings that cleared SpectralEdge's confidence, edge and distance-from-strike thresholds in force when they were raised; those are its calls. To judge readings by your own confidence threshold instead, apply it and say which threshold you used.
 - `side` is `up` or `down`. The contract settles YES on up and NO on down.
 - `confidence` is the model's probability for `side`, 0–100.
 - `entry_price_cents` is the venue's quote on the same 0–100 scale.
 - `edge_cents` is `confidence` minus `entry_price_cents`, in probability points, not money.
 - `outcome` is `pending` until the round settles, then `win`, `loss` or `void`.
+- `fired` is whether SpectralEdge showed the reading as a signal.
 
 This is research data, not trade instructions or financial advice.
 
