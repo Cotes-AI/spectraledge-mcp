@@ -119,12 +119,13 @@ Settled rounds, newest first, every reading graded.
 | Parameter | Default | |
 |---|---|---|
 | `series` | required | Series prefix |
-| `limit` | `20` | 1–100 rounds |
+| `limit` | `20` | 1–100 rounds with `fired_only`; at most 10 without it |
 | `since` | — | ISO-8601; rounds whose `window.expires_at` is at or after it |
-| `before` | — | ISO-8601, inclusive on `window.expires_at`. To page back, pass the oldest `expires_at` you received and drop the repeated row |
+| `before` | — | ISO-8601; rounds whose `window.expires_at` is at or before it |
 | `fired_only` | `false` | When `true`, each round lists only its readings with `fired: true` (SpectralEdge's own calls) |
+| `cursor` | — | The `next_cursor` from the previous result, for the next older page. Pass the same `series`, `since` and `fired_only`, and not `before` |
 
-A settled round lists every reading raised during it, one every few seconds, so a full page of 20 is several thousand readings. Pass `fired_only` for SpectralEdge's own calls, or keep `limit` small when you apply your own thresholds.
+A settled round lists every reading raised during it, one every few seconds, so without `fired_only` a page holds at most 10 rounds. A full page carries `next_cursor`; pass it back as `cursor` for the next older page, and stop when a result has none.
 
 > Of the last 50 settled rounds, how often did the first reading at 80% confidence or higher win?
 
