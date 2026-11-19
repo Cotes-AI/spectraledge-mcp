@@ -12,10 +12,11 @@ Read SpectralEdge's model signals for Kalshi's BTC, ETH, SOL and XRP 15-minute m
 ## Choose the asset
 
 For BTC use `KXBTC15M`, ETH `KXETH15M`, SOL `KXSOL15M`, and XRP `KXXRP15M`.
-Pass `series` to MCP tools. BTC remains
-the default when no asset is named. Keep different assets and model versions separate
-in accuracy, calibration, and P&L reports. Use each asset's own dollar price scale;
-XRP prices can have fractions of a cent.
+`get_active_contest` and `list_contests` require `series`; there is no default, and a
+call without one returns a validation error naming the field. The fixed
+`spectraledge://contests/active` resource and the two prompts still default to BTC.
+Keep different assets and model versions separate in accuracy, calibration, and P&L
+reports. Use each asset's own dollar price scale; XRP prices can have fractions of a cent.
 
 The MCP `list_series` tool returns the crypto catalog and latest
 stored readings. A catalog entry does not promise a running producer. Empty signals
@@ -25,7 +26,7 @@ can be stale, and a null model tag can belong to an older unversioned reading.
 ## Features
 
 - **Live round:** the contest trading now, its strike and window, and every model reading so far.
-- **Settled history:** past rounds newest first, each reading graded `win`, `loss` or `void`, paged by time.
+- **Settled history:** past rounds newest first, each reading graded `win`, `loss` or `void`, paged by time, optionally only the readings that fired.
 - **One round by ticker:** any contest, live or settled, with its readings.
 - **Prompts:** a live-round summary, and a hit-rate count at a confidence threshold you choose.
 
@@ -105,9 +106,9 @@ The round trading now, with every reading raised so far. Readings' `outcome` is 
 
 | Parameter | Default | |
 |---|---|---|
-| `series` | `KXBTC15M` | Series prefix, not a full ticker |
+| `series` | required | Series prefix, not a full ticker: `KXBTC15M`, `KXETH15M`, `KXSOL15M` or `KXXRP15M` |
 
-Returns `404` in the moment between one round settling and the next opening; retry shortly.
+Returns `404` in the moment between one round settling and the next opening; retry shortly. A series that isn't in the catalog returns the same `404` and never resolves: the `detail` says which case it is, so check the prefix against `list_series` instead of retrying.
 
 > What is SpectralEdge reading on the current BTC 15-minute contest?
 
@@ -117,10 +118,13 @@ Settled rounds, newest first, every reading graded.
 
 | Parameter | Default | |
 |---|---|---|
-| `series` | `KXBTC15M` | Series prefix |
+| `series` | required | Series prefix |
 | `limit` | `20` | 1–100 rounds |
 | `since` | — | ISO-8601; rounds whose `window.expires_at` is at or after it |
 | `before` | — | ISO-8601, inclusive on `window.expires_at`. To page back, pass the oldest `expires_at` you received and drop the repeated row |
+| `fired_only` | `false` | When `true`, each round lists only its readings with `fired: true` (SpectralEdge's own calls) |
+
+A settled round lists every reading raised during it, one every few seconds, so a full page of 20 is several thousand readings. Pass `fired_only` for SpectralEdge's own calls, or keep `limit` small when you apply your own thresholds.
 
 > Of the last 50 settled rounds, how often did the first reading at 80% confidence or higher win?
 
@@ -136,7 +140,7 @@ One round by full ticker, live or settled, with its readings. Take tickers from 
 
 ### Sample output
 
-Each tool returns the API's status and JSON body. A settled round, with 3 of its 168 readings (the model reads every few seconds):
+Each tool returns the API's status and JSON body. A settled Bitcoin round from `list_contests` with `fired_only: true`, abridged to 3 of its 5 fired readings (every reading carries its contest's `ticker` too, omitted here). Without `fired_only` the same round lists every reading, one every few seconds:
 
 ```json
 {
@@ -144,16 +148,18 @@ Each tool returns the API's status and JSON body. A settled round, with 3 of its
   "body": {
     "contests": [
       {
-        "ticker": "KXBTC15M-26NOV061530-30",
+        "ticker": "KXBTC15M-26NOV190930-30",
+        "series": "KXBTC15M",
+        "asset": "BTC",
         "state": "settled",
-        "window": { "opens_at": "2026-11-06T20:15:00Z", "expires_at": "2026-11-06T20:30:00Z" },
-        "strike_price_dollars": 75745.57,
+        "window": { "opens_at": "2026-11-19T14:15:00Z", "expires_at": "2026-11-19T14:30:00Z" },
+        "strike_price_dollars": 63893.17,
         "settled_side": "down",
-        "settled_price_dollars": 75694.95,
+        "settled_price_dollars": 63889.4,
         "signals": [
-          { "raised_at": "2026-11-06T20:16:00.001768Z", "side": "down", "confidence": 61.82, "entry_price_cents": 58.0, "edge_cents": 3.82, "outcome": "win", "model_version": "34fa82b3" },
-          { "raised_at": "2026-11-06T20:23:00.000008Z", "side": "down", "confidence": 87.41, "entry_price_cents": 80.0, "edge_cents": 7.41, "outcome": "win", "model_version": "34fa82b3" },
-          { "raised_at": "2026-11-06T20:29:55.001313Z", "side": "down", "confidence": 99.5, "entry_price_cents": 100.0, "edge_cents": -0.5, "outcome": "win", "model_version": "34fa82b3" }
+          { "raised_at": "2026-11-19T14:25:35.000007Z", "side": "down", "confidence": 92.55, "entry_price_cents": 85.0, "edge_cents": 7.55, "outcome": "win", "model_version": "60f4797d", "fired": true },
+          { "raised_at": "2026-11-19T14:25:45.000938Z", "side": "down", "confidence": 93.96, "entry_price_cents": 86.0, "edge_cents": 7.96, "outcome": "win", "model_version": "60f4797d", "fired": true },
+          { "raised_at": "2026-11-19T14:25:55.000007Z", "side": "down", "confidence": 93.63, "entry_price_cents": 87.0, "edge_cents": 6.63, "outcome": "win", "model_version": "60f4797d", "fired": true }
         ]
       }
     ]
@@ -194,10 +200,11 @@ This is research data, not trade instructions or financial advice.
 | `401` | HTTP, on `/mcp` | No key and no sign-in. OAuth clients start the sign-in from this. |
 | `401` | Tool result | A key or sign-in that is unknown or revoked. |
 | `402` | Tool result | The account has no active trial or subscription, or its trial needs a card. The body links to [app.cotes.ai](https://app.cotes.ai). |
-| `404` | Tool result | No live round right now (`get_active_contest`), or an unknown ticker. |
+| `404` | Tool result | No live round right now (`get_active_contest`), a series that isn't in the catalog (it never resolves; check `list_series`), or an unknown ticker. |
+| — | Tool error | `get_active_contest` or `list_contests` called without `series`: a validation error naming the field. |
 | `429` | HTTP, on `/mcp` | Over the rate limit; wait and retry. |
 
-Tool-result errors come back as the tool's output (`status_code` and `body`), not as MCP protocol errors.
+API errors come back as the tool's output (`status_code` and `body`), not as MCP protocol errors. A missing argument is reported as a tool error with a validation message instead.
 
 Requests are limited per IP to 1 per second on average, with bursts up to 20.
 
